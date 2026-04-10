@@ -21,7 +21,7 @@ public class TerminalGUI
                            "Press M to play the <your game's name> game.\n" +
                            "Press Q to quit.");
 
-        userInput = ensureValidInput();
+        userInput = InputValidator.ensureValidCharIgnoreCase(WORD_GAME_CHAR, NUMBER_GAME_CHAR, MY_GAME_CHAR, EXIT_CHAR);
 
         switch (userInput)
         {
@@ -36,7 +36,7 @@ public class TerminalGUI
     {
         final WordGame game;
 
-        game = new WordGame();
+//        game = new WordGame();
     }
 
     private final void enterNumber()
@@ -56,29 +56,6 @@ public class TerminalGUI
     private final void exitGame()
     {
         return;
-    }
-
-    private final char ensureValidInput()
-    {
-        char testInput;
-
-        testInput = InputValidator.userInput();
-
-        while (!(testInput == WORD_GAME_CHAR ||
-                 testInput == NUMBER_GAME_CHAR||
-                 testInput == MY_GAME_CHAR ||
-                 testInput == EXIT_CHAR))
-        {
-            System.out.println("Invalid input. Try again");
-            System.out.println("Press W to play the Word game.\n" +
-                               "Press N to play the Number game.\n" +
-                               "Press M to play the <your game's name> game.\n" +
-                               "Press Q to quit.");
-
-            testInput = InputValidator.userInput();
-        }
-
-        return testInput;
     }
 
 }

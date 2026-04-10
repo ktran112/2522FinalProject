@@ -4,12 +4,36 @@ import java.util.Scanner;
 
 public class InputValidator
 {
-    public static final boolean validateInput(final String input)
+    private static final boolean validateInputChar(final String input)
     {
         return !(input == null || input.isBlank() || input.length() > 1);
     }
 
-    public static final char userInput()
+    private static final boolean validateInputString(final String input)
+    {
+        return !(input == null || input.isBlank());
+    }
+
+    public static final String userInput()
+    {
+        String input;
+        final Scanner scan;
+
+        scan = new Scanner(System.in);
+
+        input = scan.nextLine().trim();
+
+        while (!validateInputString(input))
+        {
+            System.out.println("Invalid input. Try again.");
+
+            input = scan.nextLine().trim();
+        }
+
+        return input;
+    }
+
+    public static final String userInputIgnoreCase()
     {
         String input;
         final Scanner scan;
@@ -18,18 +42,100 @@ public class InputValidator
 
         input = scan.nextLine().trim().toLowerCase();
 
-        while (!validateInput(input))
+        while (!validateInputString(input))
         {
             System.out.println("Invalid input. Try again.");
-            System.out.println("Press W to play the Word game.\n" +
-                               "Press N to play the Number game.\n" +
-                               "Press M to play the <your game's name> game.\n" +
-                               "Press Q to quit.");
+
             input = scan.nextLine().trim().toLowerCase();
+        }
+
+        return input;
+    }
+
+    public static final char userChar()
+    {
+        String input;
+        final Scanner scan;
+
+        scan = new Scanner(System.in);
+
+        input = scan.nextLine().trim();
+
+        while (!validateInputChar(input))
+        {
+            System.out.println("Invalid input. Try again.");
+
+            input = scan.nextLine().trim();
         }
 
         return input.charAt(0);
 }
+
+    public static final char userCharIgnoreCase()
+    {
+        String input;
+        final Scanner scan;
+
+        scan = new Scanner(System.in);
+
+        input = scan.nextLine().trim().toLowerCase();
+
+        while (!validateInputChar(input))
+        {
+            System.out.println("Invalid input. Try again.");
+
+            input = scan.nextLine().trim().toLowerCase();
+        }
+
+        return input.charAt(0);
+    }
+
+
+    public static final char ensureValidChar(final char... validInputs)
+    {
+        char testInput;
+
+        testInput = InputValidator.userChar();
+
+        while (true)
+        {
+            for (final char c : validInputs)
+            {
+                if (testInput == c)
+                {
+                    return testInput;
+                }
+            }
+            System.out.println("Invalid input. Try again");
+
+            testInput = InputValidator.userChar();
+        }
+
+    }
+
+    public static final char ensureValidCharIgnoreCase(final char... validInputs)
+    {
+        char testInput;
+
+        testInput = InputValidator.userCharIgnoreCase();
+
+        while (true)
+        {
+            for (final char c : validInputs)
+            {
+                if (testInput == c)
+                {
+                    return testInput;
+                }
+            }
+            System.out.println("Invalid input. Try again");
+
+            testInput = InputValidator.userCharIgnoreCase();
+        }
+
+    }
+
+
 }
 
 

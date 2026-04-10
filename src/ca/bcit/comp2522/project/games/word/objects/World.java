@@ -1,16 +1,14 @@
-package ca.bcit.comp2522.project.games.word;
+package ca.bcit.comp2522.project.games.word.objects;
 
 import ca.bcit.comp2522.project.service.DirectoryToList;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class World
 {
-    private final static int ARRAY_SIZE = 3;
+    public static final int FACTS_AMOUNT = 3;
+
     private final static int COUNT_MIN = 0;
 
     private final Map<String, Country> countries;
@@ -18,6 +16,31 @@ public class World
     public World() throws IOException
     {
         countries = mapCountries();
+    }
+
+    public final String getRandomCountryKey()
+    {
+        final List<String> key;
+        final Random rng;
+        final String randomKey;
+
+        key = new ArrayList<>(this.countries.keySet());
+        rng = new Random();
+
+        randomKey = key.get(rng.nextInt(key.size()));
+
+        return randomKey;
+    }
+
+    public final Country getCountryByKey(final String key) {
+        if (!this.countries.containsKey(key))
+        {
+            System.out.println("No key/country");
+            return null;
+        }
+
+            return this.countries.get(key);
+
     }
 
     public final Map<String, Country> getCountries()
@@ -45,7 +68,7 @@ public class World
             int count;
 
             scan = new Scanner(block);
-            facts = new String[ARRAY_SIZE];
+            facts = new String[FACTS_AMOUNT];
             count = COUNT_MIN;
 
             temp = scan.nextLine().split(":");
@@ -65,7 +88,4 @@ public class World
 
         return mappedCountries;
     }
-
-
-
 }

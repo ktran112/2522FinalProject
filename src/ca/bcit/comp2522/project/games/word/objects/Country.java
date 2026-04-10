@@ -1,4 +1,4 @@
-package ca.bcit.comp2522.project.games.word;
+package ca.bcit.comp2522.project.games.word.objects;
 
 public class Country
 {
