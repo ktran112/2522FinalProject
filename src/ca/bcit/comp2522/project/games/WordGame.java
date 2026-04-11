@@ -25,6 +25,7 @@ public class WordGame
 
     private final World world;
     private final Score score;
+    private int questionCount;
 
     public WordGame() throws IOException
     {
@@ -34,7 +35,7 @@ public class WordGame
         startGame();
     }
 
-    private final void startGame()
+    private final void startGame() throws IOException
     {
         boolean playing;
 
@@ -42,14 +43,19 @@ public class WordGame
 
         while (playing)
         {
+            this.score.addNumGamesPlayed();
             final List<Country> listOfCountries;
 
             listOfCountries = loadQuestions();
 
             listOfCountries.forEach(this::askQuestion);
 
+            this.questionCount = UNIVERSAL_MIN;
+
             playing = promptPlayAgain();
         }
+
+        this.score.logScore();
     }
 
     private final boolean confirmPlay()
@@ -104,7 +110,9 @@ public class WordGame
 
     private final void giveCapitalExpectCountry(final Country country)
     {
-        System.out.println("\nThe capital of this country is: " + country.getCapitalCityName());
+        ++this.questionCount;
+        System.out.println("Question " + this.questionCount + "/" + QUESTION_AMOUNT + ":");
+        System.out.println("The capital of this country is: " + country.getCapitalCityName());
         System.out.println("What is the country? Provide your guess (1/" + GUESSES_ALLOWED + "): ");
 
         checkAnswerProcedure(country.getName());
@@ -112,7 +120,9 @@ public class WordGame
 
     private final void giveCountryExpectCapital(final Country country)
     {
-        System.out.println("\nThe country of this capital is: " + country.getName());
+        ++this.questionCount;
+        System.out.println("Question " + this.questionCount + "/" + QUESTION_AMOUNT + ":");
+        System.out.println("The country of this capital is: " + country.getName());
         System.out.println("What is the capital? Provide your guess (1/" + GUESSES_ALLOWED + "): ");
 
         checkAnswerProcedure(country.getCapitalCityName());
@@ -126,7 +136,9 @@ public class WordGame
         rng = new Random();
         factIndex = rng.nextInt(World.FACTS_AMOUNT);
 
-        System.out.println("\nA fact of this country is: " + country.getFacts()[factIndex]);
+        ++this.questionCount;
+        System.out.println("Question " + this.questionCount + "/" + QUESTION_AMOUNT + ":");
+        System.out.println("A fact of this country is: " + country.getFacts()[factIndex]);
         System.out.println("What is this country? Provide your guess (1/" + GUESSES_ALLOWED + "): ");
 
         checkAnswerProcedure(country.getName());
@@ -146,6 +158,7 @@ public class WordGame
         if (input.equalsIgnoreCase(answer))
         {
             this.score.addNumCorrectFirstAttempt();
+            this.score.addPointsOnFirstTry();
             System.out.println("\nCORRECT\n");
             return;
         }
@@ -159,6 +172,7 @@ public class WordGame
         if (input.equalsIgnoreCase(answer))
         {
             this.score.addNumCorrectSecondAttempt();
+            this.score.addPointsOnSecondTry();
             System.out.println("\nCORRECT\n");
             return;
         }

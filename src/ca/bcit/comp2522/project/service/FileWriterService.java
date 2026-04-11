@@ -14,9 +14,9 @@ public class FileWriterService
 {
     private static final String FILE_EXTENSION = ".txt";
 
-    public static final void logGame(final String directory,
-                                     final String name,
-                                     final List<String> logs) throws IOException
+    public static final void logNewFile(final String directory,
+                                        final String name,
+                                        final List<String> logs) throws IOException
     {
         final DateTimeFormatter formatter;
         final Path path;
@@ -32,7 +32,6 @@ public class FileWriterService
                 StandardOpenOption.CREATE,
                 StandardOpenOption.APPEND))
         {
-            writer.write(logs.size());
 
             for (String line : logs)
             {
@@ -45,6 +44,32 @@ public class FileWriterService
         {
             throw new IOException("Failed to write to: \"" + path + "\"", e);
         }
+    }
 
+    public static final void logExistingFile(final String directory,
+                                             final String name,
+                                             final List<String> logs) throws IOException
+    {
+        final DateTimeFormatter formatter;
+        final Path path;
+        final String logName;
+
+        logName = name + FILE_EXTENSION;
+        path = Paths.get(directory, logName);
+
+
+        try (final BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND))
+        {
+            for (String line : logs)
+            {
+                writer.write(line);
+                writer.newLine();
+            }
+        }
+
+        catch (IOException e)
+        {
+            throw new IOException("Failed to write to: \"" + path + "\"", e);
+        }
     }
 }
