@@ -6,6 +6,7 @@ import ca.bcit.comp2522.project.games.word.services.Score;
 import ca.bcit.comp2522.project.service.InputValidator;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,26 +25,34 @@ public class WordGame
     private static final int UNIVERSAL_MIN = 0;
 
     private final World world;
-    private final Score score;
     private int questionCount;
+    private int numGamesPlayed;
+    private int numCorrectFirstAttempt;
+    private int numCorrectSecondAttempt;
+    private int numIncorrectTwoAttempts;
 
     public WordGame() throws IOException
     {
         this.world = new World();
-        this.score = new Score();
+        this.questionCount = UNIVERSAL_MIN;
+        this.numGamesPlayed = UNIVERSAL_MIN;
+        this.numCorrectFirstAttempt = UNIVERSAL_MIN;
+        this.numCorrectSecondAttempt = UNIVERSAL_MIN;
+        this.numIncorrectTwoAttempts = UNIVERSAL_MIN;
 
         startGame();
     }
 
     private final void startGame() throws IOException
     {
+        Score score;
         boolean playing;
 
         playing = confirmPlay();
 
         while (playing)
         {
-            this.score.addNumGamesPlayed();
+            this.numGamesPlayed++;
             final List<Country> listOfCountries;
 
             listOfCountries = loadQuestions();
@@ -52,11 +61,22 @@ public class WordGame
 
             this.questionCount = UNIVERSAL_MIN;
 
+            score = new Score(LocalDateTime.now(), numGamesPlayed, numCorrectFirstAttempt, numCorrectSecondAttempt, numIncorrectTwoAttempts);
+
+            System.out.println(score.getScoreMessage());
+
+            Score.updateHighScoreFile(score);
+
             playing = promptPlayAgain();
         }
 
-        this.score.logScore();
-        this.score.updateHighScoreFile();
+        score = new Score(LocalDateTime.now(), numGamesPlayed, numCorrectFirstAttempt, numCorrectSecondAttempt, numIncorrectTwoAttempts);
+
+        if (score.getNumGamesPlayed() != UNIVERSAL_MIN)
+        {
+            Score.appendScoreToFile(score, "scoreLogs/score.txt");
+            Score.updateHighScoreFile(score);
+        }
     }
 
     private final boolean confirmPlay()
@@ -72,7 +92,6 @@ public class WordGame
 
         return userInput == YES_CHAR;
     }
-
 
     private final List<Country> loadQuestions()
     {
@@ -158,8 +177,7 @@ public class WordGame
 
         if (input.equalsIgnoreCase(answer))
         {
-            this.score.addNumCorrectFirstAttempt();
-            this.score.addPointsOnFirstTry();
+            this.numCorrectFirstAttempt++;
             System.out.println("\nCORRECT\n");
             return;
         }
@@ -172,15 +190,14 @@ public class WordGame
 
         if (input.equalsIgnoreCase(answer))
         {
-            this.score.addNumCorrectSecondAttempt();
-            this.score.addPointsOnSecondTry();
+            this.numCorrectSecondAttempt++;
             System.out.println("\nCORRECT\n");
             return;
         }
 
-        this.score.addNumIncorrectTwoAttempts();
+        this.numIncorrectTwoAttempts++;
 
-        System.out.println("\nINCORRECT. The correct answer was: " + answer);
+        System.out.println("\nINCORRECT. The correct answer was: " + answer + "\n");
     }
 
     private final boolean promptPlayAgain()

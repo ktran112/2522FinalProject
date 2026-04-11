@@ -1,4 +1,6 @@
 package ca.bcit.comp2522.project.games;
 
-public class NumberGame {
+public class NumberGame
+{
+    
 }

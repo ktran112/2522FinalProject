@@ -47,18 +47,16 @@ public class FileWriterService
     }
 
     public static final void appendExistingFile(final String directory,
-                                                final String name,
                                                 final List<String> logs) throws IOException
     {
         final DateTimeFormatter formatter;
         final Path path;
         final String logName;
 
-        logName = name + FILE_EXTENSION;
-        path = Paths.get(directory, logName);
+        path = Paths.get(directory);
 
 
-        try (final BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND))
+        try (final BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND, StandardOpenOption.CREATE))
         {
             for (String line : logs)
             {
@@ -74,17 +72,15 @@ public class FileWriterService
     }
 
     public static final void appendExistingFile(final String directory,
-                                                final String name,
                                                 final String append) throws IOException
     {
         final DateTimeFormatter formatter;
         final Path path;
         final String logName;
 
-        logName = name + FILE_EXTENSION;
-        path = Paths.get(directory, logName);
+        path = Paths.get(directory);
 
-        try (final BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND))
+        try (final BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND, StandardOpenOption.CREATE))
         {
                 writer.write(append);
                 writer.newLine();

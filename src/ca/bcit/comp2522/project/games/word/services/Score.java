@@ -4,6 +4,9 @@ import ca.bcit.comp2522.project.service.FileToList;
 import ca.bcit.comp2522.project.service.FileWriterService;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,50 +21,50 @@ public class Score
     private static final int POINTS_ON_FIRST_TRY = 2;
     private static final int POINTS_ON_SECOND_TRY = 1;
     private static final int DECIMAL_TO_WHOLE_NUMBER = 100;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final int FIELDS_TO_COVER = 5;
 
-    private final DateTimeFormatter formatter;
+    private final LocalDateTime dateTime;
+    private final int numGamesPlayed;
+    private final int numCorrectFirstAttempt;
+    private final int numCorrectSecondAttempt;
+    private final int numIncorrectTwoAttempts;
+    private final int points;
 
-    private int numGamesPlayed;
-    private int numCorrectFirstAttempt;
-    private int numCorrectSecondAttempt;
-    private int numIncorrectTwoAttempts;
-    private int points;
-
-    public Score()
+    public Score(final LocalDateTime dateTime,
+                 final int numGamesPlayed,
+                 final int numCorrectFirstAttempt,
+                 final int numCorrectSecondAttempt,
+                 final int numIncorrectTwoAttempts)
     {
-
-        this.formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");;
-        this.numGamesPlayed = UNIVERSAL_MIN;
-        this.numCorrectFirstAttempt = UNIVERSAL_MIN;
-        this.numCorrectSecondAttempt = UNIVERSAL_MIN;
-        this.numIncorrectTwoAttempts = UNIVERSAL_MIN;
+        this.dateTime = dateTime;
+        this.numGamesPlayed = numGamesPlayed;
+        this.numCorrectFirstAttempt = numCorrectFirstAttempt;
+        this.numCorrectSecondAttempt = numCorrectSecondAttempt;
+        this.numIncorrectTwoAttempts = numIncorrectTwoAttempts;
+        this.points = (numCorrectFirstAttempt * POINTS_ON_FIRST_TRY) +
+                      (numCorrectSecondAttempt * POINTS_ON_SECOND_TRY);
     }
 
-    public final void addNumGamesPlayed()
-    {
-        this.numGamesPlayed++;
-    }
 
-    public final void addNumCorrectFirstAttempt() {
-        this.numCorrectFirstAttempt++;
-    }
+    public final List<String> scoreToListWithSummary() throws IOException {
+        final List<String> list;
 
-    public final void addNumCorrectSecondAttempt() {
-        this.numCorrectSecondAttempt++;
-    }
+        list = new ArrayList<>();
 
-    public final void addNumIncorrectTwoAttempts() {
-        this.numIncorrectTwoAttempts++;
-    }
+        list.add("Date and Time: " + this.dateTime.format(DATE_TIME_FORMATTER));
+        list.add("Games Played: " + this.numGamesPlayed);
+        list.add("Correct First Attempts: " + this.numCorrectFirstAttempt);
+        list.add("Correct Second Attempts: " + this.numCorrectSecondAttempt);
+        list.add("Incorrect Attempts: " + this.numIncorrectTwoAttempts);
+        list.add("Points: " + this.points);
+        list.add("\n");
+        list.add(getGameSummarized());
+        list.add("\n");
+        list.add(getScoreMessage());
+        list.add("\n");
 
-    public final void addPointsOnFirstTry()
-    {
-        this.points += POINTS_ON_FIRST_TRY;
-    }
-
-    public final void addPointsOnSecondTry()
-    {
-        this.points += POINTS_ON_SECOND_TRY;
+        return list;
     }
 
     public final List<String> scoreToList() throws IOException {
@@ -69,17 +72,12 @@ public class Score
 
         list = new ArrayList<>();
 
-        list.add("Date and Time: " + LocalDateTime.now().format(formatter));
+        list.add("Date and Time: " + this.dateTime.format(DATE_TIME_FORMATTER));
         list.add("Games Played: " + this.numGamesPlayed);
         list.add("Correct First Attempts: " + this.numCorrectFirstAttempt);
         list.add("Correct Second Attempts: " + this.numCorrectSecondAttempt);
         list.add("Incorrect Attempts: " + this.numIncorrectTwoAttempts);
-        list.add("Total points: " + this.points);
-        list.add("\n");
-        list.add(getGameSummarized());
-        list.add("\n");
-        list.add(getScoreMessage());
-        list.add("\n");
+        list.add("Points: " + this.points);
 
         return list;
     }
@@ -137,7 +135,7 @@ public class Score
                 return "CONGRATULATIONS! You have a new high score, with an average of\n" +
                         avg + " " + pointAmount + " per game; the previous record was " +
                         df.format(getCurrentHighScore()) + " " + highScorePointAmount +
-                        " per game\n" + LocalDateTime.now().format(formatter);
+                        " per game\n" + getCurrentHighScoreDate();
             }
         }
 
@@ -160,7 +158,6 @@ public class Score
 
         avg = (float) this.points / this.numGamesPlayed;
 
-        System.out.println(Math.round(avg * DECIMAL_TO_WHOLE_NUMBER) > Math.round(getCurrentHighScore() * DECIMAL_TO_WHOLE_NUMBER));
         return Math.round(avg * DECIMAL_TO_WHOLE_NUMBER) > Math.round(getCurrentHighScore() * DECIMAL_TO_WHOLE_NUMBER);
     }
 
@@ -169,7 +166,7 @@ public class Score
         final List<String> scores;
         final Optional<Float> highScore;
 
-        scores = FileToList.read("scoreLogs/highscores/highscores.txt");
+        scores = FileToList.read("scoreLogs/highscores/highscore.txt");
 
         highScore = scores.stream()
                           .map(s->s.split("\\|")[0])
@@ -184,7 +181,7 @@ public class Score
         final List<String> scores;
         final List<Float> list;
 
-        scores = FileToList.read("scoreLogs/highscores/highscores.txt");
+        scores = FileToList.read("scoreLogs/highscores/highscore.txt");
 
         if (scores.isEmpty())
         {
@@ -203,7 +200,7 @@ public class Score
     {
         final List<String> scores;
 
-        scores = FileToList.read("scoreLogs/highscores/highscores.txt");
+        scores = FileToList.read("scoreLogs/highscores/highscore.txt");
 
         if (getCurrentHighScoreIndex() == -1)
         {
@@ -213,34 +210,131 @@ public class Score
         return scores.get(getCurrentHighScoreIndex()).split("\\|")[1];
     }
 
+    public final int getScore()
+    {
+        return this.points;
+    }
 
-    public final int getNumGamesPlayed() {
+
+    public final int getNumGamesPlayed()
+    {
         return this.numGamesPlayed;
     }
 
-    public final int getNumCorrectFirstAttempt() {
+    public final int getNumCorrectFirstAttempt()
+    {
         return this.numCorrectFirstAttempt;
     }
 
-    public final int getNumCorrectSecondAttempt() {
+    public final int getNumCorrectSecondAttempt()
+    {
         return this.numCorrectSecondAttempt;
     }
 
-    public final int getNumIncorrectTwoAttempts() {
+    public final int getNumIncorrectTwoAttempts()
+    {
         return this.numIncorrectTwoAttempts;
     }
 
-    public final void logScore() throws IOException
-    {
-        if (this.numGamesPlayed == 0)
-        {
-            return;
-        }
-
-        FileWriterService.appendExistingFile("scoreLogs", "score", scoreToList());
+    @Override
+    public String toString() {
+        return "Date and Time: " + dateTime.format(DATE_TIME_FORMATTER) + "\n" +
+                "Games Played: " + this.numGamesPlayed + "\n" +
+                "Correct First Attempts: " + this.numCorrectFirstAttempt + "\n" +
+                "Correct Second Attempts: " + this.numCorrectSecondAttempt + "\n" +
+                "Incorrect Attempts: " + this.numIncorrectTwoAttempts + "\n" +
+                "Score: " + this.points + " points" +
+                "\n";
     }
 
-    public final void updateHighScoreFile() throws IOException
+    public static final void appendScoreToFile(final Score score,
+                                               final String directory) throws IOException
+    {
+        FileWriterService.appendExistingFile(directory, score.scoreToList());
+    }
+
+    public static List<Score> readScoresFromFile(final String directory) throws IOException
+    {
+        final List<Score> scores;
+        final List<String> lines;
+        final Path path;
+
+        LocalDateTime dateTime;
+        int numGamesPlayed;
+        int numCorrectFirstAttempt;
+        int numCorrectSecondAttempt;
+        int numIncorrectTwoAttempts;
+        int count;
+
+        path = Paths.get(directory);
+        scores = new ArrayList<>();
+        lines = Files.readAllLines(path);
+
+        dateTime = null;
+        numGamesPlayed = UNIVERSAL_MIN;
+        numCorrectFirstAttempt = UNIVERSAL_MIN;
+        numCorrectSecondAttempt = UNIVERSAL_MIN;
+        numIncorrectTwoAttempts = UNIVERSAL_MIN;
+        count = UNIVERSAL_MIN;
+
+
+        for (final String line : lines)
+        {
+            if (line.startsWith("Date and Time: "))
+            {
+                dateTime = LocalDateTime.parse(line.substring("Date and Time: ".length()), DATE_TIME_FORMATTER);
+                ++count;
+            }
+
+            else if (line.startsWith("Games Played: "))
+            {
+                numGamesPlayed = Integer.parseInt(line.substring("Games Played: ".length()).trim());
+                ++count;
+            }
+
+            else if (line.startsWith("Correct First Attempts: "))
+            {
+                numCorrectFirstAttempt = Integer.parseInt(line.substring("Correct First Attempts: ".length()).trim());
+                ++count;
+            }
+
+            else if (line.startsWith("Correct Second Attempts: "))
+            {
+                numCorrectSecondAttempt = Integer.parseInt(line.substring("Correct Second Attempts: ".length()).trim());
+                ++count;
+            }
+
+            else if (line.startsWith("Incorrect Attempts: "))
+            {
+                numIncorrectTwoAttempts = Integer.parseInt(line.substring("Incorrect Attempts: ".length()).trim());
+                ++count;
+            }
+
+            else if (line.isBlank() && dateTime != null)
+            {
+                scores.add(new Score(dateTime, numGamesPlayed, numCorrectFirstAttempt,
+                                     numCorrectSecondAttempt, numIncorrectTwoAttempts));
+
+                dateTime = null;
+                numGamesPlayed = UNIVERSAL_MIN;
+                numCorrectFirstAttempt = UNIVERSAL_MIN;
+                numCorrectSecondAttempt = UNIVERSAL_MIN;
+                numIncorrectTwoAttempts = UNIVERSAL_MIN;
+
+            }
+
+            if (count == FIELDS_TO_COVER)
+            {
+                count = UNIVERSAL_MIN;
+            scores.add(new Score(dateTime, numGamesPlayed, numCorrectFirstAttempt,
+                                 numCorrectSecondAttempt, numIncorrectTwoAttempts));
+            }
+        }
+
+        return scores;
+    }
+
+    public static final void updateHighScoreFile(final Score score) throws IOException
     {
         final DecimalFormat df;
         final DateTimeFormatter formatter;
@@ -250,25 +344,24 @@ public class Score
 
         df = new DecimalFormat("#.##");
         formatter = DateTimeFormatter.ofPattern("'on 'yyyy-MM-dd' at 'HH:mm:ss");
-        avg = (float) this.points / this.numGamesPlayed;
-        scores = FileToList.read("scoreLogs/highscores/highscores.txt");
+        avg = (float) score.getScore() / score.getNumGamesPlayed();
+        scores = FileToList.read("scoreLogs/highscores/highscore.txt");
 
         sameScore = scores.stream()
                 .map(s->s.split("\\|")[0])
                 .map(Float::parseFloat)
                 .anyMatch(f->Math.round(f * DECIMAL_TO_WHOLE_NUMBER) ==
-                                   Math.round(avg * DECIMAL_TO_WHOLE_NUMBER));
+                        Math.round(avg * DECIMAL_TO_WHOLE_NUMBER));
 
-        if (this.numGamesPlayed == UNIVERSAL_MIN)
+        if (score.getNumGamesPlayed() == UNIVERSAL_MIN)
         {
             return;
         }
 
         if (!sameScore && avg != 0.0F)
         {
-            FileWriterService.appendExistingFile("scoreLogs/highscores",
-                                                    "highscores",
-                                                   df.format(avg) + "|" + LocalDateTime.now().format(formatter));
+            FileWriterService.appendExistingFile("scoreLogs/highscores/highscore.txt",
+                                                  df.format(avg) + "|" + LocalDateTime.now().format(formatter));
         }
     }
 }
