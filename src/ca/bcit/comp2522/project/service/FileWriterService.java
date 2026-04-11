@@ -46,9 +46,9 @@ public class FileWriterService
         }
     }
 
-    public static final void logExistingFile(final String directory,
-                                             final String name,
-                                             final List<String> logs) throws IOException
+    public static final void appendExistingFile(final String directory,
+                                                final String name,
+                                                final List<String> logs) throws IOException
     {
         final DateTimeFormatter formatter;
         final Path path;
@@ -65,6 +65,29 @@ public class FileWriterService
                 writer.write(line);
                 writer.newLine();
             }
+        }
+
+        catch (IOException e)
+        {
+            throw new IOException("Failed to write to: \"" + path + "\"", e);
+        }
+    }
+
+    public static final void appendExistingFile(final String directory,
+                                                final String name,
+                                                final String append) throws IOException
+    {
+        final DateTimeFormatter formatter;
+        final Path path;
+        final String logName;
+
+        logName = name + FILE_EXTENSION;
+        path = Paths.get(directory, logName);
+
+        try (final BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND))
+        {
+                writer.write(append);
+                writer.newLine();
         }
 
         catch (IOException e)

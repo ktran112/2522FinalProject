@@ -56,6 +56,7 @@ public class WordGame
         }
 
         this.score.logScore();
+        this.score.updateHighScoreFile();
     }
 
     private final boolean confirmPlay()

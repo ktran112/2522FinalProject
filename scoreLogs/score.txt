@@ -1,9 +1,15 @@
+Date and Time: 2026-04-10_23-52-32
+Games Played: 1
+Correct First Attempts: 2
+Correct Second Attempts: 2
+Incorrect Attempts: 6
+Total points: 6
 
-Date and Time: 2026-04-10_17-34-39
-Games Played: 0
-Correct First Attempts: 0
-Correct Second Attempts: 0
-Incorrect Attempts: 0
-Total points: 0
+
+Total is 6 points in 1 game, for an average score of 6 points per game.
+
+
+CONGRATULATIONS! You have a new high score, with an average of
+6 point per game.
 
 
